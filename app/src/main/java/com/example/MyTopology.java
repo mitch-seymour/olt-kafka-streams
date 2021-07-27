@@ -4,20 +4,25 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.GlobalKTable;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.Printed;
+import org.apache.kafka.streams.kstream.KTable;
 
 class MyTopology {
 
   public static Topology build() {
     StreamsBuilder builder = new StreamsBuilder();
 
-    // read from the `tweets` topic
-    KStream<byte[], String> tweets =
+    // read the topic as a stream
+    KStream<byte[], String> tweetStream =
         builder.stream("tweets", Consumed.with(Serdes.ByteArray(), Serdes.String()));
 
-    // print the contents of each stream for debugging purposes
-    tweets.print(Printed.<byte[], String>toSysOut().withLabel("tweets"));
+    // read the topic as a stream
+  KTable<byte[], String>  usersTable =
+        builder.table("users", Consumed.with(Serdes.ByteArray(), Serdes.String()));
+
+    GlobalKTable<byte[], String> usersGlobalTable =
+        builder.globalTable("users", Consumed.with(Serdes.ByteArray(), Serdes.String()));
 
     return builder.build();
   }

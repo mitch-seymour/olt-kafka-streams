@@ -11,12 +11,27 @@ kafka-topics \
   --partitions 4 \
   --create
 
+# create the users topic
+kafka-topics \
+  --bootstrap-server kafka:9092 \
+  --topic users \
+  --replication-factor 1 \
+  --partitions 4 \
+  --create
+
 echo "Pre-populating Kafka topics"
-# pre-populate the topic
+# pre-populate the tweets topic
 kafka-console-producer \
   --bootstrap-server kafka:9092 \
   --topic tweets \
   --property 'parse.key=true' \
   --property 'key.separator=|' < /data/inputs.txt
+
+# pre-populate the users topic
+kafka-console-producer \
+  --bootstrap-server kafka:9092 \
+  --topic users \
+  --property 'parse.key=true' \
+  --property 'key.separator=|' < /data/users.txt
 
 sleep infinity
