@@ -13,7 +13,7 @@ class App {
 
     // set the required properties for running Kafka Streams
     Properties config = new Properties();
-    config.put(StreamsConfig.APPLICATION_ID_CONFIG, "dev-group");
+    config.put(StreamsConfig.APPLICATION_ID_CONFIG, "dev-group-filter");
     config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:29092");
 
     // set some optional properties
