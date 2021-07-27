@@ -16,6 +16,8 @@ class MyTopology {
     KStream<byte[], String> stream =
         builder.stream("tweets", Consumed.with(Serdes.ByteArray(), Serdes.String()));
 
+    stream.filter((key, value) -> value.toLowerCase().contains("bitcoin"));
+
     // print the output
     stream.print(Printed.<byte[], String>toSysOut().withLabel("tweets-stream"));
 
