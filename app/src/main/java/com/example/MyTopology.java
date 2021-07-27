@@ -18,7 +18,7 @@ class MyTopology {
         builder.stream("tweets", Consumed.with(Serdes.ByteArray(), Serdes.String()));
 
     // read the topic as a stream
-  KTable<byte[], String>  usersTable =
+    KTable<byte[], String> usersTable =
         builder.table("users", Consumed.with(Serdes.ByteArray(), Serdes.String()));
 
     GlobalKTable<byte[], String> usersGlobalTable =
