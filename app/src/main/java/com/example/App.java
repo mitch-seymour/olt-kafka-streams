@@ -8,12 +8,52 @@ import org.apache.kafka.streams.Topology;
 
 class App {
   public static void main(String[] args) {
-    // instantiate the topology
-    Topology topology = MyTopology.build();
+    Topology topology;
+    String step = System.getenv().getOrDefault("step", "1");
+    switch (step) {
+      case "2":
+        System.out.println("Running step 2 version");
+        topology = com.example.step2.MyTopology.build();
+        break;
+
+      case "3":
+        System.out.println("Running step 3 version");
+        topology = com.example.step3.MyTopology.build();
+        break;
+
+      case "4":
+        System.out.println("Running step 4 version");
+        topology = com.example.step4.MyTopology.build();
+        break;
+
+      case "5":
+        System.out.println("Running step 5 version");
+        topology = com.example.step5.MyTopology.build();
+        break;
+
+      case "6":
+        System.out.println("Running step 6 version");
+        topology = com.example.step6.MyTopology.build();
+        break;
+
+      case "7":
+        System.out.println("Running step 7 version");
+        topology = com.example.step7.MyTopology.build();
+        break;
+
+      case "8":
+        System.out.println("Running step 8 version");
+        topology = com.example.step8.MyTopology.build();
+        break;
+
+      default:
+        System.out.println("Running step 1 version");
+        topology = com.example.step1.MyTopology.build();
+    }
 
     // set the required properties for running Kafka Streams
     Properties config = new Properties();
-    config.put(StreamsConfig.APPLICATION_ID_CONFIG, "dev-group");
+    config.put(StreamsConfig.APPLICATION_ID_CONFIG, "dev-group" + step);
     config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:29092");
 
     // set some optional properties

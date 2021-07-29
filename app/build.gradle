@@ -44,8 +44,3 @@ test {
         events "passed", "skipped", "failed"
     }
 }
-
-task runSourceProcessorExample(type: JavaExec) {
-    main = 'com.example.tutorials.sourceprocessor.App'
-    classpath sourceSets.main.runtimeClasspath
-}
