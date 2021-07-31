@@ -55,7 +55,7 @@ public class MyTopology {
 
     // print the last step for debugging purposes
     dogecoinBranch.print(Printed.<byte[], String>toSysOut().withLabel("branch-dogecoin"));
-    defaultBranch.print(Printed.<byte[], String>toSysOut().withLabel("branch-bitcoin"));
+    defaultBranch.print(Printed.<byte[], String>toSysOut().withLabel("branch-default"));
 
     return builder.build();
   }
