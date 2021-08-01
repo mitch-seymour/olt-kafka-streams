@@ -1,11 +1,10 @@
-package com.example.step2;
+package com.example.step1;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Printed;
 
 public class MyTopology {
@@ -17,12 +16,8 @@ public class MyTopology {
     KStream<String, String> tweetStream =
         builder.stream("tweets", Consumed.with(Serdes.String(), Serdes.String()));
 
-    // read the crypto-symbols topic as a table
-    KTable<String, String> symbolsTable =
-        builder.table("crypto-symbols", Consumed.with(Serdes.String(), Serdes.String()));
-
     // print
-    symbolsTable.toStream().print(Printed.<String, String>toSysOut().withLabel("crypto-symbols"));
+    tweetStream.print(Printed.<String, String>toSysOut().withLabel("tweets"));
 
     return builder.build();
   }

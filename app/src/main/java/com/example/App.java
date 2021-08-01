@@ -32,8 +32,8 @@ class App {
         break;
 
       default:
-        System.out.println("Running step 1 version");
-        topology = com.example.step1.MyTopology.build();
+        System.out.println("Running step 2 version");
+        topology = com.example.step2.MyTopology.build();
     }
 
     // set the required properties for running Kafka Streams

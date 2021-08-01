@@ -1,10 +1,7 @@
-package com.example.step4;
+package com.example.step3;
 
 import com.example.util.TweetParser;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
@@ -28,13 +25,8 @@ public class MyTopology {
     // rekey the tweets by currency
     KStream<String, String> tweetsRekeyed = tweetStream.selectKey(TweetParser::getCurrency);
 
-    // join
-    KStream<String, String> joined =
-        tweetsRekeyed.join(
-            symbolsTable, (tweet, symbol) -> String.format("%s - (%s)", tweet, symbol));
-
     // print
-    joined.print(Printed.<String, String>toSysOut().withLabel("joined"));
+    tweetsRekeyed.print(Printed.<String, String>toSysOut().withLabel("tweets-rekeyed"));
 
     return builder.build();
   }

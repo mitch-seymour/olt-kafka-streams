@@ -1,4 +1,4 @@
-package com.example.step5;
+package com.example.step4;
 
 import com.example.util.TweetParser;
 import java.util.ArrayList;
@@ -33,11 +33,8 @@ public class MyTopology {
         tweetsRekeyed.join(
             symbolsTable, (tweet, symbol) -> String.format("%s - (%s)", tweet, symbol));
 
-    // count
-    KTable<String, Long> counts = tweetsRekeyed.groupByKey().count();
-
     // print
-    counts.toStream().print(Printed.<String, Long>toSysOut().withLabel("counts"));
+    joined.print(Printed.<String, String>toSysOut().withLabel("joined"));
 
     return builder.build();
   }

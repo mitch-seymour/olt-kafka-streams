@@ -1,6 +1,10 @@
-package com.example.step2;
+package com.example.step5;
 
+import com.example.util.TweetParser;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
@@ -21,8 +25,19 @@ public class MyTopology {
     KTable<String, String> symbolsTable =
         builder.table("crypto-symbols", Consumed.with(Serdes.String(), Serdes.String()));
 
+    // rekey the tweets by currency
+    KStream<String, String> tweetsRekeyed = tweetStream.selectKey(TweetParser::getCurrency);
+
+    // join
+    KStream<String, String> joined =
+        tweetsRekeyed.join(
+            symbolsTable, (tweet, symbol) -> String.format("%s - (%s)", tweet, symbol));
+
+    // count
+    KTable<String, Long> counts = tweetsRekeyed.groupByKey().count();
+
     // print
-    symbolsTable.toStream().print(Printed.<String, String>toSysOut().withLabel("crypto-symbols"));
+    counts.toStream().print(Printed.<String, Long>toSysOut().withLabel("counts"));
 
     return builder.build();
   }
