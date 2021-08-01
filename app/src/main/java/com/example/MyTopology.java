@@ -1,92 +1,77 @@
 package com.example;
 
-import java.util.Arrays;
-import java.util.Map;
+import com.example.util.TweetParser;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.utils.Bytes;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.kstream.Branched;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.Named;
+import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Printed;
-import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.state.KeyValueStore;
 
 public class MyTopology {
 
   public static Topology build() {
     StreamsBuilder builder = new StreamsBuilder();
 
-    // read the topic as a stream
-    KStream<byte[], String> tweetStream =
-        builder.stream("tweets", Consumed.with(Serdes.ByteArray(), Serdes.String()));
+    // read the tweets topic as a stream
+    KStream<String, String> tweetStream =
+        builder.stream("tweets", Consumed.with(Serdes.String(), Serdes.String()));
 
-    // print the last step for debugging purposes
-    tweetStream.print(Printed.<byte[], String>toSysOut().withLabel("tweets"));
+    // print
+    tweetStream.print(Printed.<String, String>toSysOut().withLabel("tweets"));
 
-    // sentences (1:N transform)
-    KStream<byte[], String> sentences =
-        tweetStream.flatMapValues((key, value) -> Arrays.asList(value.split("\\.")));
+    // read the crypto-symbols topic as a table
+    KTable<String, String> symbolsTable =
+        builder.table("crypto-symbols", Consumed.with(Serdes.String(), Serdes.String()));
 
-    // print the last step for debugging purposes
-    sentences.print(Printed.<byte[], String>toSysOut().withLabel("sentences"));
+    // print
+    symbolsTable.toStream().print(Printed.<String, String>toSysOut().withLabel("crypto-symbols"));
 
-    // lowercase tweets (1:1 transform)
-    KStream<byte[], String> lowercaseTweets =
-        sentences.mapValues((key, value) -> value.toLowerCase().trim());
+    // rekey the tweets by currency
+    KStream<String, String> tweetsRekeyed =
+        tweetStream.flatMap(
+            (key, value) -> {
+              List<String> currencies = TweetParser.getCurrencies(value);
+              List<KeyValue<String, String>> records = new ArrayList<>();
+              for (String currency : currencies) {
+                records.add(KeyValue.pair(currency, value));
+              }
+              return records;
+            });
 
-    // print the last step for debugging purposes
-    lowercaseTweets.print(Printed.<byte[], String>toSysOut().withLabel("lowercase-tweets"));
+    // print
+    tweetsRekeyed.print(Printed.<String, String>toSysOut().withLabel("tweets-rekeyed"));
 
-    // filter
-    KStream<byte[], String> filteredTweets =
-        lowercaseTweets.filter(
-            (key, value) ->
-                value.contains("dogecoin")
-                    || value.contains("bitcoin")
-                    || value.contains("ethereum"));
+    // join
+    KStream<String, String> joined =
+        tweetsRekeyed.join(
+            symbolsTable, (tweet, symbol) -> String.format("%s - (%s)", tweet, symbol));
 
-    // print the last step for debugging purposes
-    filteredTweets.print(Printed.<byte[], String>toSysOut().withLabel("filtered-tweets"));
+    // print
+    joined.print(Printed.<String, String>toSysOut().withLabel("joined"));
 
-    // branch
-    Map<String, KStream<byte[], String>> branches =
-        filteredTweets
-            .split(Named.as("branch-"))
-            .branch(
-                (key, value) -> value.contains("dogecoin"), /* first predicate  */
-                Branched.as("dogecoin"))
-            .defaultBranch(Branched.as("default"));
+    // count
+    KTable<String, Long> counts = tweetsRekeyed.groupByKey().count();
 
-    // get the branches
-    KStream<byte[], String> dogecoinBranch = branches.get("branch-dogecoin");
-    KStream<byte[], String> defaultBranch = branches.get("branch-default");
+    // print
+    counts.toStream().print(Printed.<String, Long>toSysOut().withLabel("counts"));
 
-    // print the last step for debugging purposes
-    dogecoinBranch.print(Printed.<byte[], String>toSysOut().withLabel("branch-dogecoin"));
-    defaultBranch.print(Printed.<byte[], String>toSysOut().withLabel("branch-default"));
-
-    // example of extra processing for a single branch
-    KStream<byte[], String> processedDogecoinTweets =
-        dogecoinBranch.mapValues((key, value) -> enrichDogecoinTweet(value));
-
-    // print the last step for debugging purposes
-    processedDogecoinTweets.print(Printed.<byte[], String>toSysOut().withLabel("filtered"));
-
-    // merge the streams
-    KStream<byte[], String> merged = defaultBranch.merge(processedDogecoinTweets);
-
-    // print the last step for debugging purposes
-    merged.print(Printed.<byte[], String>toSysOut().withLabel("merged"));
-
-    // output topic
-    merged.to("formatted-tweets", Produced.with(Serdes.ByteArray(), Serdes.String()));
+    // count materialized
+    KTable<String, Long> countsM =
+        tweetsRekeyed
+            .groupByKey()
+            .count(
+                Materialized.<String, Long, KeyValueStore<Bytes, byte[]>>as("counts")
+                    .withKeySerde(Serdes.String())
+                    .withValueSerde(Serdes.Long()));
 
     return builder.build();
-  }
-
-  public static String enrichDogecoinTweet(String tweet) {
-    // this is just for demo purposes.
-    return tweet;
   }
 }

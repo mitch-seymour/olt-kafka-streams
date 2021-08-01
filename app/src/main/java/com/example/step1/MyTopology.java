@@ -12,12 +12,12 @@ public class MyTopology {
   public static Topology build() {
     StreamsBuilder builder = new StreamsBuilder();
 
-    // read the topic as a stream
-    KStream<byte[], String> tweetStream =
-        builder.stream("tweets", Consumed.with(Serdes.ByteArray(), Serdes.String()));
+    // read the tweets topic as a stream
+    KStream<String, String> tweetStream =
+        builder.stream("tweets", Consumed.with(Serdes.String(), Serdes.String()));
 
-    // print the last step for debugging purposes
-    tweetStream.print(Printed.<byte[], String>toSysOut().withLabel("tweets"));
+    // print
+    tweetStream.print(Printed.<String, String>toSysOut().withLabel("tweets"));
 
     return builder.build();
   }

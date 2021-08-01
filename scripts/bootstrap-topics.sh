@@ -3,6 +3,7 @@ echo "Waiting for Kafka to come online..."
 cub kafka-ready -b kafka:9092 1 20
 
 echo "Creating Kafka topics"
+
 # create the tweets topic
 kafka-topics \
   --bootstrap-server kafka:9092 \
@@ -14,7 +15,7 @@ kafka-topics \
 # create the users topic
 kafka-topics \
   --bootstrap-server kafka:9092 \
-  --topic users \
+  --topic crypto-symbols \
   --replication-factor 1 \
   --partitions 4 \
   --create
@@ -30,8 +31,8 @@ kafka-console-producer \
 # pre-populate the users topic
 kafka-console-producer \
   --bootstrap-server kafka:9092 \
-  --topic users \
+  --topic crypto-symbols \
   --property 'parse.key=true' \
-  --property 'key.separator=|' < /data/users.txt
+  --property 'key.separator=|' < /data/crypto-symbols.txt
 
 sleep infinity

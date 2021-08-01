@@ -31,21 +31,6 @@ class App {
         topology = com.example.step5.MyTopology.build();
         break;
 
-      case "6":
-        System.out.println("Running step 6 version");
-        topology = com.example.step6.MyTopology.build();
-        break;
-
-      case "7":
-        System.out.println("Running step 7 version");
-        topology = com.example.step7.MyTopology.build();
-        break;
-
-      case "8":
-        System.out.println("Running step 8 version");
-        topology = com.example.step8.MyTopology.build();
-        break;
-
       default:
         System.out.println("Running step 1 version");
         topology = com.example.step1.MyTopology.build();
@@ -53,12 +38,15 @@ class App {
 
     // set the required properties for running Kafka Streams
     Properties config = new Properties();
-    config.put(StreamsConfig.APPLICATION_ID_CONFIG, "dev-group" + step);
+    config.put(StreamsConfig.APPLICATION_ID_CONFIG, "dev-" + step);
     config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:29092");
 
     // set some optional properties
     config.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
     config.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+
+    // disable DSL cache
+    config.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
 
     // build the topology and start streaming!
     KafkaStreams streams = new KafkaStreams(topology, config);
@@ -68,5 +56,10 @@ class App {
 
     System.out.println("Starting Kafka Streams application");
     streams.start();
+
+    // get key-value store
+    // ReadOnlyKeyValueStore<String, Long> stateStore =
+    //   streams.store(
+    //        StoreQueryParameters.fromNameAndType("counts", QueryableStoreTypes.keyValueStore()));
   }
 }
