@@ -26,7 +26,7 @@ kafka-console-producer \
   --bootstrap-server kafka:9092 \
   --topic tweets \
   --property 'parse.key=true' \
-  --property 'key.separator=|' < /data/inputs.txt
+  --property 'key.separator=|' < /data/tweets.txt
 
 # pre-populate the users topic
 kafka-console-producer \
