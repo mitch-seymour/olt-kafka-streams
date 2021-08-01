@@ -26,16 +26,7 @@ public class MyTopology {
         builder.table("crypto-symbols", Consumed.with(Serdes.String(), Serdes.String()));
 
     // rekey the tweets by currency
-    KStream<String, String> tweetsRekeyed =
-        tweetStream.flatMap(
-            (key, value) -> {
-              List<String> currencies = TweetParser.getCurrencies(value);
-              List<KeyValue<String, String>> records = new ArrayList<>();
-              for (String currency : currencies) {
-                records.add(KeyValue.pair(currency, value));
-              }
-              return records;
-            });
+    KStream<String, String> tweetsRekeyed = tweetStream.selectKey(TweetParser::getCurrency);
 
     // join
     KStream<String, String> joined =

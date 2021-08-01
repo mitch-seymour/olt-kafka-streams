@@ -12,4 +12,12 @@ public class TweetParser {
         Arrays.asList(tweetText.replaceAll("[^a-zA-Z ]", "").toLowerCase().trim().split(" "));
     return words.stream().distinct().filter(currencies::contains).collect(Collectors.toList());
   }
+
+  public static String getCurrency(String key, String tweetText) {
+    List<String> currencies = getCurrencies(tweetText);
+    if (currencies.size() > 0) {
+      return currencies.get(0);
+    }
+    return "";
+  }
 }
