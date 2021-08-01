@@ -31,6 +31,11 @@ class App {
         topology = com.example.step5.MyTopology.build();
         break;
 
+      case "6":
+        System.out.println("Running step 6 version");
+        topology = com.example.step6.MyTopology.build();
+        break;
+
       default:
         System.out.println("Running step 2 version");
         topology = com.example.step2.MyTopology.build();

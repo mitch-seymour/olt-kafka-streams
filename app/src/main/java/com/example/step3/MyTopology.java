@@ -1,4 +1,4 @@
-package com.example.step2;
+package com.example.step3;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;

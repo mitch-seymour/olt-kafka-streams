@@ -1,4 +1,4 @@
-package com.example.step3;
+package com.example.step4;
 
 import com.example.util.TweetParser;
 import org.apache.kafka.common.serialization.Serdes;
