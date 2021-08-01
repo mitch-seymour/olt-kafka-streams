@@ -2,6 +2,8 @@ echo "Waiting for Kafka to come online..."
 
 cub kafka-ready -b kafka:9092 1 20
 
+sleep 2
+
 echo "Creating Kafka topics"
 
 # create the tweets topic
